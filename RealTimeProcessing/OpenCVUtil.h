@@ -15,19 +15,19 @@
 @interface OpenCVUtil : NSObject
 
 /**
- CGImageをOpenCV画像データに変換するメソッド
+ `UIImage`インスタンスをOpenCV画像データに変換するメソッド
  
- @param     image       CGImageRef
+ @param     image       `UIImage`インスタンス
  @return    `IplImage`インスタンス
  */
-+ (IplImage *)newIplImageFromCGImage:(CGImageRef)image;
++ (IplImage *)IplImageFromUIImage:(UIImage *)image;
 
 /**
- OpenCV画像データをCGImageに変換するメソッド
+ OpenCV画像データを`UIImage`インスタンスに変換するメソッド
  
  @param     image `IplImage`インスタンス
- @return    CGImageRef
+ @return    `UIImage`インスタンス
  */
-+ (CGImageRef)newCGImageFromIplImage:(IplImage *)image;
++ (UIImage *)UIImageFromIplImage:(IplImage*)image;
 
 @end

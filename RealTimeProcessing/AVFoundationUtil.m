@@ -10,7 +10,7 @@
 
 @implementation AVFoundationUtil
 
-+ (CGImageRef)imageFromSampleBuffer:(CMSampleBufferRef)sampleBuffer
++ (UIImage *)imageFromSampleBuffer:(CMSampleBufferRef)sampleBuffer
 {
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     
@@ -35,13 +35,15 @@
                                                     colorSpace,
                                                     kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
     
-    CGImageRef cgImage = CGBitmapContextCreateImage(newContext);
+    CGImageRef imageRef = CGBitmapContextCreateImage(newContext);
+    UIImage *ret = [UIImage imageWithCGImage:imageRef];
     
+    CGImageRelease(imageRef);
     CGContextRelease(newContext);
     CGColorSpaceRelease(colorSpace);
     CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
     
-    return cgImage;
+    return ret;
 }
 
 + (AVCaptureVideoOrientation)videoOrientationFromDeviceOrientation:(UIDeviceOrientation)deviceOrientation

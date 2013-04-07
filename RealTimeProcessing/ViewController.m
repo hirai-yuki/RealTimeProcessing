@@ -173,15 +173,13 @@
 }
 
 // 画像の加工処理
-- (void)process:(CGImageRef)imageRef
+- (void)process:(UIImage *)image
 {
     // 画像を白黒に加工
-    CGImageRef processedImageRef = [MonochromeFilter doFilter:imageRef];
-    CGImageRelease(imageRef);
+    UIImage *processedImage = [MonochromeFilter doFilter:image];
     
     // 加工した画像をプレビューレイヤーに追加
-    self.previewLayer.contents = (__bridge id)(processedImageRef);
-    CGImageRelease(processedImageRef);
+    self.previewLayer.contents = (__bridge id)(processedImage.CGImage);
 
     // フロントカメラの場合は左右反転
     if (self.isUsingFrontFacingCamera) {
@@ -198,11 +196,11 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
        fromConnection:(AVCaptureConnection *)connection
 {
     // キャプチャしたフレームからCGImageを作成
-    CGImageRef imageRef = [AVFoundationUtil imageFromSampleBuffer:sampleBuffer];
+    UIImage *image = [AVFoundationUtil imageFromSampleBuffer:sampleBuffer];
     
     // 画像を画面に表示
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self process:imageRef];
+        [self process:image];
     });
 }
 

@@ -10,6 +10,6 @@
 
 @interface MonochromeFilter : NSObject
 
-+ (CGImageRef)doFilter:(CGImageRef)image;
++ (UIImage *)doFilter:(UIImage *)image;
 
 @end

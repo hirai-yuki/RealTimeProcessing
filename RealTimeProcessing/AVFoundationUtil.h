@@ -16,12 +16,12 @@
 @interface AVFoundationUtil : NSObject
 
 /**
- サンプルバッファのデータからCGImageRefを生成する
+ サンプルバッファのデータから`UIImage`インスタンスを生成する
  
  @param     sampleBuffer       サンプルバッファ
- @return    生成したCGImageRef
+ @return    生成した`UIImage`インスタンス
  */
-+ (CGImageRef)imageFromSampleBuffer:(CMSampleBufferRef)sampleBuffer;
++ (UIImage *)imageFromSampleBuffer:(CMSampleBufferRef)sampleBuffer;
 
 /**
  デバイスの向きからカメラAPIの向きを判別する

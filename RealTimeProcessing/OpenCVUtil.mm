@@ -10,77 +10,83 @@
 
 @implementation OpenCVUtil
 
-+ (IplImage *)newIplImageFromCGImage:(CGImageRef)image
++ (IplImage *)IplImageFromUIImage:(UIImage *)image
 {
-    CGContextRef context;
-    CGColorSpaceRef colorSpace;
-    IplImage *iplImageTemp, *iplImage;
+    CGImageRef imageRef = image.CGImage;
     
     // RGB色空間を作成
-    colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
     // 一時的なIplImageを作成
-    iplImageTemp = cvCreateImage(cvSize(CGImageGetWidth(image), CGImageGetHeight(image)), IPL_DEPTH_8U, 4);
+    IplImage *iplimage = cvCreateImage(cvSize(image.size.width,image.size.height), IPL_DEPTH_8U, 4);
     
     // CGBitmapContextをIplImageのビットマップデータのポインタから作成
-    context = CGBitmapContextCreate(iplImageTemp->imageData,
-                                    iplImageTemp->width,
-                                    iplImageTemp->height,
-                                    iplImageTemp->depth,
-                                    iplImageTemp->widthStep,
-                                    colorSpace,
-                                    kCGImageAlphaPremultipliedLast | kCGBitmapByteOrderDefault);
+    CGContextRef contextRef = CGBitmapContextCreate(
+                                                    iplimage->imageData,
+                                                    iplimage->width,
+                                                    iplimage->height,
+                                                    iplimage->depth,
+                                                    iplimage->widthStep,
+                                                    colorSpace,
+                                                    kCGImageAlphaPremultipliedLast|kCGBitmapByteOrderDefault);
     
     // CGImageをCGBitmapContextに描画
-    CGContextDrawImage(context, CGRectMake(0.0f, 0.0f, CGImageGetWidth(image), CGImageGetHeight(image)), image);
+    CGContextDrawImage(contextRef,
+                       CGRectMake(0, 0, image.size.width, image.size.height),
+                       imageRef);
     
     // ビットマップコンテキストと色空間を解放
-    CGContextRelease(context);
+    CGContextRelease(contextRef);
     CGColorSpaceRelease(colorSpace);
     
     // 最終的なIplImageを作成
-    iplImage = cvCreateImage(cvGetSize(iplImageTemp), IPL_DEPTH_8U, 3);
-    cvCvtColor(iplImageTemp, iplImage, CV_RGBA2RGB);
+    IplImage *ret = cvCreateImage(cvGetSize(iplimage), IPL_DEPTH_8U, 3);
     
     // 一時的なIplImageを解放
-    cvReleaseImage(&iplImageTemp);
+    cvCvtColor(iplimage, ret, CV_RGBA2BGR);
+    cvReleaseImage(&iplimage);
     
-    // 必要なら呼び出し側でcvReleaseImageよりメモリを解放すること
-    return iplImage;
+    return ret;
 }
 
-+ (CGImageRef)newCGImageFromIplImage:(IplImage *)image
++ (UIImage *)UIImageFromIplImage:(IplImage*)image
 {
     CGColorSpaceRef colorSpace;
-    NSData *data;
-    CGDataProviderRef provider;
-    CGImageRef cgImage;
-    
-    // RGB色空間
-    colorSpace = CGColorSpaceCreateDeviceRGB();
+    if (image->nChannels == 1) {
+        colorSpace = CGColorSpaceCreateDeviceGray();
+    } else {
+        colorSpace = CGColorSpaceCreateDeviceRGB();
+        //BGRになっているのでRGBに変換
+        cvCvtColor(image, image, CV_BGR2RGB);
+    }
     
     // IplImageのビットマップデータのポインタアドレスからNSDataを作成
-    data = [NSData dataWithBytes:image->imageData length:image->imageSize];
-    provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
+    NSData *data = [NSData dataWithBytes:image->imageData length:image->imageSize];
+    
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
     
     // CGImageを作成
-    cgImage = CGImageCreate(image->width,
-                            image->height,
-                            image->depth,
-                            image->depth * image->nChannels,
-                            image->widthStep,
-                            colorSpace,
-                            kCGImageAlphaNone | kCGBitmapByteOrderDefault,
-                            provider,
-                            NULL,
-                            false,
-                            kCGRenderingIntentDefault);
+    CGImageRef imageRef = CGImageCreate(image->width,
+                                        image->height,
+                                        image->depth,
+                                        image->depth * image->nChannels,
+                                        image->widthStep,
+                                        colorSpace,
+                                        kCGImageAlphaNone|kCGBitmapByteOrderDefault,
+                                        provider,
+                                        NULL,
+                                        false,
+                                        kCGRenderingIntentDefault
+                                        );
     
-    CGColorSpaceRelease(colorSpace);
+    // UIImageを生成
+    UIImage *ret = [UIImage imageWithCGImage:imageRef];
+    
+    CGImageRelease(imageRef);
     CGDataProviderRelease(provider);
+    CGColorSpaceRelease(colorSpace);
     
-    // 必要なら呼び出し側でCGImageReleaseによりメモリを解放すること
-    return cgImage;
+    return ret;
 }
 
 @end

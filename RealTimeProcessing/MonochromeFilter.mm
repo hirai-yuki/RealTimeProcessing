@@ -11,10 +11,10 @@
 
 @implementation MonochromeFilter
 
-+ (CGImageRef)doFilter:(CGImageRef)image
++ (UIImage *)doFilter:(UIImage *)image
 {
     // CGImageからIplImageを作成
-    IplImage *srcImage       = [OpenCVUtil newIplImageFromCGImage:image];
+    IplImage *srcImage       = [OpenCVUtil IplImageFromUIImage:image];
     IplImage *grayScaleImage = cvCreateImage(cvGetSize(srcImage), IPL_DEPTH_8U, 1);
     IplImage *dstImage       = cvCreateImage(cvGetSize(srcImage), IPL_DEPTH_8U, 3);
     
@@ -25,7 +25,7 @@
     cvCvtColor(grayScaleImage, dstImage, CV_GRAY2BGR);
     
     // IplImageからCGImageを作成
-    CGImageRef effectedImage = [OpenCVUtil newCGImageFromIplImage:dstImage];
+    UIImage *effectedImage = [OpenCVUtil UIImageFromIplImage:dstImage];
     
     cvReleaseImage(&srcImage);
     cvReleaseImage(&grayScaleImage);
